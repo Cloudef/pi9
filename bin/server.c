@@ -404,16 +404,16 @@ cb_attach(struct pi9 *pi9, uint16_t tag, uint32_t fid, uint32_t afid, const stru
    return true;
 
 err_nofid:
-   pi9_write_error(tag, ERR_NO_FID, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NO_FID, pi9->out);
    return false;
 err_oom:
-   pi9_write_error(tag, ERR_OUT_OF_MEMORY, pi9->out);
+   pi9_write_error(tag, PI9_ERR_OUT_OF_MEMORY, pi9->out);
    return false;
 err_not_allowed:
-   pi9_write_error(tag, ERR_NOT_ALLOWED, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NOT_ALLOWED, pi9->out);
    return false;
 err_no_auth:
-   pi9_write_error(tag, ERR_NO_AUTH, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NO_AUTH, pi9->out);
    return false;
 }
 
@@ -510,16 +510,16 @@ cb_walk(struct pi9 *pi9, uint16_t tag, uint32_t fid, uint32_t newfid, uint16_t n
    return true;
 
 err_nofid:
-   pi9_write_error(tag, ERR_NO_FID, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NO_FID, pi9->out);
    return false;
 err_fid_in_use:
-   pi9_write_error(tag, ERR_FID_IN_USE, pi9->out);
+   pi9_write_error(tag, PI9_ERR_FID_IN_USE, pi9->out);
    return false;
 err_not_directory:
-   pi9_write_error(tag, ERR_NOT_DIRECTORY, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NOT_DIRECTORY, pi9->out);
    return false;
 err_oom:
-   pi9_write_error(tag, ERR_OUT_OF_MEMORY, pi9->out);
+   pi9_write_error(tag, PI9_ERR_OUT_OF_MEMORY, pi9->out);
    return false;
 }
 
@@ -558,10 +558,10 @@ cb_open(struct pi9 *pi9, uint16_t tag, uint32_t fid, uint8_t mode, struct pi9_qi
    return true;
 
 err_nofid:
-   pi9_write_error(tag, ERR_NO_FID, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NO_FID, pi9->out);
    return false;
 err_not_allowed:
-   pi9_write_error(tag, ERR_NOT_ALLOWED, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NOT_ALLOWED, pi9->out);
    return false;
 }
 
@@ -607,14 +607,14 @@ cb_create(struct pi9 *pi9, uint16_t tag, uint32_t fid, const struct pi9_string *
    // (out_iounit is by default 0)
 
    // FIXME: creation code here
-   pi9_write_error(tag, ERR_NO_FID, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NO_FID, pi9->out);
    return false;
 
 err_nofid:
-   pi9_write_error(tag, ERR_NO_FID, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NO_FID, pi9->out);
    return false;
 err_not_allowed:
-   pi9_write_error(tag, ERR_NOT_ALLOWED, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NOT_ALLOWED, pi9->out);
    return false;
 }
 
@@ -636,13 +636,13 @@ cb_read(struct pi9 *pi9, uint16_t tag, uint32_t fid, uint64_t offset, uint32_t c
    return true;
 
 err_write:
-   pi9_write_error(tag, ERR_WRITE, pi9->out);
+   pi9_write_error(tag, PI9_ERR_WRITE, pi9->out);
    return false;
 err_nofid:
-   pi9_write_error(tag, ERR_NO_FID, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NO_FID, pi9->out);
    return false;
 err_not_allowed:
-   pi9_write_error(tag, ERR_NOT_ALLOWED, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NOT_ALLOWED, pi9->out);
    return false;
 }
 
@@ -669,13 +669,13 @@ cb_write(struct pi9 *pi9, uint16_t tag, uint32_t fid, uint64_t offset, uint32_t 
    return true;
 
 err_write:
-   pi9_write_error(tag, ERR_WRITE, pi9->out);
+   pi9_write_error(tag, PI9_ERR_WRITE, pi9->out);
    return false;
 err_nofid:
-   pi9_write_error(tag, ERR_NO_FID, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NO_FID, pi9->out);
    return false;
 err_not_allowed:
-   pi9_write_error(tag, ERR_NOT_ALLOWED, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NOT_ALLOWED, pi9->out);
    return false;
 }
 
@@ -695,7 +695,7 @@ cb_clunk(struct pi9 *pi9, uint16_t tag, uint32_t fid)
    return true;
 
 err_oom:
-   pi9_write_error(tag, ERR_OUT_OF_MEMORY, pi9->out);
+   pi9_write_error(tag, PI9_ERR_OUT_OF_MEMORY, pi9->out);
    return false;
 }
 
@@ -726,13 +726,13 @@ cb_remove(struct pi9 *pi9, uint16_t tag, uint32_t fid)
    return true;
 
 err_nofid:
-   pi9_write_error(tag, ERR_NO_FID, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NO_FID, pi9->out);
    return false;
 err_oom:
-   pi9_write_error(tag, ERR_OUT_OF_MEMORY, pi9->out);
+   pi9_write_error(tag, PI9_ERR_OUT_OF_MEMORY, pi9->out);
    return false;
 err_not_allowed:
-   pi9_write_error(tag, ERR_NOT_ALLOWED, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NOT_ALLOWED, pi9->out);
    return false;
 }
 
@@ -755,7 +755,7 @@ cb_stat(struct pi9 *pi9, uint16_t tag, uint32_t fid, struct pi9_stat **out_stat)
    return true;
 
 err_nofid:
-   pi9_write_error(tag, ERR_NO_FID, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NO_FID, pi9->out);
    return false;
 }
 
@@ -845,10 +845,10 @@ cb_twstat(struct pi9 *pi9, uint16_t tag, uint32_t fid, const struct pi9_stat *st
    return true;
 
 err_nofid:
-   pi9_write_error(tag, ERR_NO_FID, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NO_FID, pi9->out);
    return false;
 err_not_allowed:
-   pi9_write_error(tag, ERR_NOT_ALLOWED, pi9->out);
+   pi9_write_error(tag, PI9_ERR_NOT_ALLOWED, pi9->out);
    return false;
 }
 

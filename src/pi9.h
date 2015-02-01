@@ -93,16 +93,16 @@ enum {
 };
 
 enum pi9_error {
-   ERR_READ,
-   ERR_WRITE,
-   ERR_NO_AUTH,
-   ERR_NOT_DIRECTORY,
-   ERR_NO_FID,
-   ERR_FID_IN_USE,
-   ERR_NOT_ALLOWED,
-   ERR_UNKNOWN_OP,
-   ERR_OUT_OF_MEMORY,
-   ERR_LAST,
+   PI9_ERR_READ,
+   PI9_ERR_WRITE,
+   PI9_ERR_NO_AUTH,
+   PI9_ERR_NOT_DIRECTORY,
+   PI9_ERR_NO_FID,
+   PI9_ERR_FID_IN_USE,
+   PI9_ERR_NOT_ALLOWED,
+   PI9_ERR_UNKNOWN_OP,
+   PI9_ERR_OUT_OF_MEMORY,
+   PI9_ERR_LAST,
 };
 
 bool pi9_write_stat(struct pi9_stat *stat, struct chck_buffer *out);

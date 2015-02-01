@@ -89,7 +89,7 @@ static struct {
 static const struct {
    const char *msg;
    size_t size;
-} errors[ERR_LAST] = {
+} errors[PI9_ERR_LAST] = {
 #define MSG(x) { x, sizeof(x) }
    MSG("Could not read message."),
    MSG("Could not write message."),
@@ -197,13 +197,13 @@ op_Tversion(struct pi9 *pi9, uint16_t tag, struct chck_buffer *in, struct chck_b
    return true;
 
 err_read:
-   pi9_write_error(tag, ERR_READ, out);
+   pi9_write_error(tag, PI9_ERR_READ, out);
    return false;
 err_write:
-   pi9_write_error(tag, ERR_WRITE, out);
+   pi9_write_error(tag, PI9_ERR_WRITE, out);
    return false;
 err_not_allowed:
-   pi9_write_error(tag, ERR_NOT_ALLOWED, out);
+   pi9_write_error(tag, PI9_ERR_NOT_ALLOWED, out);
    return false;
 }
 
@@ -250,13 +250,13 @@ op_Tauth(struct pi9 *pi9, uint16_t tag, struct chck_buffer *in, struct chck_buff
    return true;
 
 err_read:
-   pi9_write_error(tag, ERR_READ, out);
+   pi9_write_error(tag, PI9_ERR_READ, out);
    return false;
 err_write:
-   pi9_write_error(tag, ERR_WRITE, out);
+   pi9_write_error(tag, PI9_ERR_WRITE, out);
    return false;
 err_no_auth:
-   pi9_write_error(tag, ERR_NO_AUTH, out);
+   pi9_write_error(tag, PI9_ERR_NO_AUTH, out);
    return false;
 }
 
@@ -301,10 +301,10 @@ op_Tattach(struct pi9 *pi9, uint16_t tag, struct chck_buffer *in, struct chck_bu
    return true;
 
 err_read:
-   pi9_write_error(tag, ERR_READ, out);
+   pi9_write_error(tag, PI9_ERR_READ, out);
    return false;
 err_write:
-   pi9_write_error(tag, ERR_WRITE, out);
+   pi9_write_error(tag, PI9_ERR_WRITE, out);
    return false;
 }
 
@@ -335,10 +335,10 @@ op_Tflush(struct pi9 *pi9, uint16_t tag, struct chck_buffer *in, struct chck_buf
    return true;
 
 err_read:
-   pi9_write_error(tag, ERR_READ, out);
+   pi9_write_error(tag, PI9_ERR_READ, out);
    return false;
 err_write:
-   pi9_write_error(tag, ERR_WRITE, out);
+   pi9_write_error(tag, PI9_ERR_WRITE, out);
    return false;
 }
 
@@ -391,13 +391,13 @@ op_Twalk(struct pi9 *pi9, uint16_t tag, struct chck_buffer *in, struct chck_buff
    return true;
 
 err_read:
-   pi9_write_error(tag, ERR_READ, out);
+   pi9_write_error(tag, PI9_ERR_READ, out);
    return false;
 err_write:
-   pi9_write_error(tag, ERR_WRITE, out);
+   pi9_write_error(tag, PI9_ERR_WRITE, out);
    return false;
 err_not_allowed:
-   pi9_write_error(tag, ERR_NOT_ALLOWED, out);
+   pi9_write_error(tag, PI9_ERR_NOT_ALLOWED, out);
    return false;
 }
 
@@ -436,13 +436,13 @@ op_Topen(struct pi9 *pi9, uint16_t tag, struct chck_buffer *in, struct chck_buff
    return true;
 
 err_read:
-   pi9_write_error(tag, ERR_READ, out);
+   pi9_write_error(tag, PI9_ERR_READ, out);
    return false;
 err_write:
-   pi9_write_error(tag, ERR_WRITE, out);
+   pi9_write_error(tag, PI9_ERR_WRITE, out);
    return false;
 err_not_allowed:
-   pi9_write_error(tag, ERR_NOT_ALLOWED, out);
+   pi9_write_error(tag, PI9_ERR_NOT_ALLOWED, out);
    return false;
 }
 
@@ -491,13 +491,13 @@ op_Tcreate(struct pi9 *pi9, uint16_t tag, struct chck_buffer *in, struct chck_bu
    return true;
 
 err_read:
-   pi9_write_error(tag, ERR_READ, out);
+   pi9_write_error(tag, PI9_ERR_READ, out);
    return false;
 err_write:
-   pi9_write_error(tag, ERR_WRITE, out);
+   pi9_write_error(tag, PI9_ERR_WRITE, out);
    return false;
 err_not_allowed:
-   pi9_write_error(tag, ERR_NOT_ALLOWED, out);
+   pi9_write_error(tag, PI9_ERR_NOT_ALLOWED, out);
    return false;
 }
 
@@ -533,10 +533,10 @@ op_Tread(struct pi9 *pi9, uint16_t tag, struct chck_buffer *in, struct chck_buff
    return true;
 
 err_read:
-   pi9_write_error(tag, ERR_READ, out);
+   pi9_write_error(tag, PI9_ERR_READ, out);
    return false;
 err_write:
-   pi9_write_error(tag, ERR_WRITE, out);
+   pi9_write_error(tag, PI9_ERR_WRITE, out);
    return false;
 }
 
@@ -567,10 +567,10 @@ op_Twrite(struct pi9 *pi9, uint16_t tag, struct chck_buffer *in, struct chck_buf
    return true;
 
 err_read:
-   pi9_write_error(tag, ERR_READ, out);
+   pi9_write_error(tag, PI9_ERR_READ, out);
    return false;
 err_write:
-   pi9_write_error(tag, ERR_WRITE, out);
+   pi9_write_error(tag, PI9_ERR_WRITE, out);
    return false;
 }
 
@@ -596,10 +596,10 @@ op_Tclunk(struct pi9 *pi9, uint16_t tag, struct chck_buffer *in, struct chck_buf
    return true;
 
 err_read:
-   pi9_write_error(tag, ERR_READ, out);
+   pi9_write_error(tag, PI9_ERR_READ, out);
    return false;
 err_write:
-   pi9_write_error(tag, ERR_WRITE, out);
+   pi9_write_error(tag, PI9_ERR_WRITE, out);
    return false;
 }
 
@@ -625,10 +625,10 @@ op_Tremove(struct pi9 *pi9, uint16_t tag, struct chck_buffer *in, struct chck_bu
    return true;
 
 err_read:
-   pi9_write_error(tag, ERR_READ, out);
+   pi9_write_error(tag, PI9_ERR_READ, out);
    return false;
 err_write:
-   pi9_write_error(tag, ERR_WRITE, out);
+   pi9_write_error(tag, PI9_ERR_WRITE, out);
    return false;
 }
 
@@ -669,10 +669,10 @@ op_Tstat(struct pi9 *pi9, uint16_t tag, struct chck_buffer *in, struct chck_buff
    return true;
 
 err_read:
-   pi9_write_error(tag, ERR_READ, out);
+   pi9_write_error(tag, PI9_ERR_READ, out);
    return false;
 err_write:
-   pi9_write_error(tag, ERR_WRITE, out);
+   pi9_write_error(tag, PI9_ERR_WRITE, out);
    return false;
 }
 
@@ -704,10 +704,10 @@ op_Twstat(struct pi9 *pi9, uint16_t tag, struct chck_buffer *in, struct chck_buf
    return true;
 
 err_read:
-   pi9_write_error(tag, ERR_READ, out);
+   pi9_write_error(tag, PI9_ERR_READ, out);
    return false;
 err_write:
-   pi9_write_error(tag, ERR_WRITE, out);
+   pi9_write_error(tag, PI9_ERR_WRITE, out);
    return false;
 }
 
@@ -731,10 +731,10 @@ call_op(struct pi9 *pi9, enum op op, uint16_t tag, struct chck_buffer *in, struc
    return ops[op].cb(pi9, tag, in, out);
 
 err_write:
-   pi9_write_error(tag, ERR_WRITE, out);
+   pi9_write_error(tag, PI9_ERR_WRITE, out);
    return false;
 err_unknown_op:
-   pi9_write_error(tag, ERR_UNKNOWN_OP, out);
+   pi9_write_error(tag, PI9_ERR_UNKNOWN_OP, out);
    return false;
 }
 
@@ -837,12 +837,12 @@ pi9_process(struct pi9 *pi9, int32_t fd)
    bool ret = true;
    if (!read_msg(pi9, fd, pi9->in, pi9->out)) {
       if (pi9->out->curpos == pi9->out->buffer)
-         pi9_write_error(NOTAG, ERR_READ, pi9->out);
+         pi9_write_error(NOTAG, PI9_ERR_READ, pi9->out);
       ret = false;
    }
 
    if (!write_msg(fd, pi9->out)) {
-      pi9_write_error(NOTAG, ERR_WRITE, pi9->out);
+      pi9_write_error(NOTAG, PI9_ERR_WRITE, pi9->out);
       write_msg(fd, pi9->out);
       ret = false;
    }
