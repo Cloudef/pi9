@@ -260,10 +260,7 @@ cb_read_hello(struct pi9 *pi9, struct node *node, uint64_t offset, uint32_t coun
    // The bytes are returned with the read reply message.
 
    // XXX: Just example here, we ignore offset and count
-   if (pi9_write("Hello World!", 1, sizeof("Hello World!"), pi9->out) != sizeof("Hello World!"))
-      return false;
-
-   return true;
+   return (pi9_write("Hello World!", 1, sizeof("Hello World!"), pi9->out) == sizeof("Hello World!"));
 }
 
 static bool
