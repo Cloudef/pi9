@@ -6,7 +6,7 @@
 
 static const uint32_t PI9_NOFID = (uint32_t)~0;
 
-struct chck_buffer;
+struct pi9_stream;
 
 struct pi9_qid {
    uint8_t type;
@@ -30,7 +30,7 @@ struct pi9_stat {
 
 struct pi9 {
    void *userdata;
-   struct chck_buffer *in, *out;
+   struct pi9_stream *stream;
 
    uint32_t msize;
 
@@ -105,9 +105,9 @@ enum pi9_error {
    PI9_ERR_LAST,
 };
 
-bool pi9_write_stat(struct pi9_stat *stat, struct chck_buffer *out);
-void pi9_write_error(uint16_t tag, enum pi9_error error, struct chck_buffer *out);
-size_t pi9_write(const void *src, size_t size, size_t nmemb, struct chck_buffer *out);
+bool pi9_write_stat(struct pi9_stat *stat, struct pi9_stream *stream);
+void pi9_write_error(uint16_t tag, enum pi9_error error, struct pi9_stream *stream);
+size_t pi9_write(const void *src, size_t size, size_t nmemb, struct pi9_stream *stream);
 void pi9_stat_release(struct pi9_stat *stat);
 bool pi9_process(struct pi9 *pi9, int32_t fd);
 bool pi9_init(struct pi9 *pi9, uint32_t msize, struct pi9_procs *procs, void *userdata);
