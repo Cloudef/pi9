@@ -1,3 +1,2 @@
-add_library(chck_buffer STATIC chck/chck/buffer/buffer.c)
-add_library(chck_pool STATIC chck/chck/pool/pool.c)
-add_library(chck_lut STATIC chck/chck/lut/lut.c)
+add_library(chck_pi9_lib STATIC chck/chck/buffer/buffer.c)
+add_library(chck_pi9_server STATIC chck/chck/pool/pool.c chck/chck/lut/lut.c)
