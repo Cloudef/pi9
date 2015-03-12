@@ -75,10 +75,8 @@ get_node(struct fs *fs, size_t node)
 }
 
 static bool
-unlink_nodes(struct fs *fs, struct node *parent, struct node *child)
+unlink_nodes(struct node *parent, struct node *child)
 {
-   assert(fs);
-
    if (!child)
       return false;
 
@@ -105,7 +103,7 @@ unlink_childs(struct fs *fs, struct node *parent)
 
    size_t *c;
    chck_iter_pool_for_each(&parent->childs, c)
-      unlink_nodes(fs, parent, get_node(fs, *c));
+      unlink_nodes(parent, get_node(fs, *c));
 
    chck_iter_pool_release(&parent->childs);
 }
@@ -118,7 +116,7 @@ link_nodes(struct fs *fs, struct node *parent, struct node *child)
    if (!parent || !child)
       return false;
 
-   if (child->parent != NONODE && !unlink_nodes(fs, get_node(fs, child->parent), child))
+   if (child->parent != NONODE && !unlink_nodes(get_node(fs, child->parent), child))
       return false;
 
    if (child->stat.qid.path != NONODE && !chck_iter_pool_push_back(&parent->childs, &child->stat.qid.path))
@@ -148,7 +146,7 @@ remove_node(struct fs *fs, struct node *node)
       return;
 
    unlink_childs(fs, node);
-   unlink_nodes(fs, get_node(fs, node->parent), node);
+   unlink_nodes(get_node(fs, node->parent), node);
    node_release(node);
 
    if (node->stat.qid.path != NONODE) {
