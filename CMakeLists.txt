@@ -3,6 +3,8 @@ PROJECT(pi9)
 set(PI9_NAME "pi9")
 set(PI9_DESCRIPTION "9p server abstraction library")
 
+OPTION(PI9_BUILD_BINARIES "Build binaries" ON)
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${pi9_SOURCE_DIR}/CMake)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
@@ -28,6 +30,9 @@ include_directories(
 
 add_subdirectory(lib)
 add_subdirectory(src)
-add_subdirectory(bin)
+
+if (PI9_BUILD_BINARIES)
+   add_subdirectory(bin)
+endif ()
 
 file(COPY src/pi9.h src/pi9_string.h DESTINATION include/pi9)
