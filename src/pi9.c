@@ -364,7 +364,7 @@ op_Twalk(struct pi9 *pi9, uint16_t tag, struct pi9_stream *stream)
       goto err_not_allowed;
 
    struct pi9_string walks[MAXWELEM] = {{0}};
-   for (uint32_t i = 0; i < MAXWELEM; ++i) {
+   for (uint32_t i = 0; i < nwname; ++i) {
       uint16_t len;
       if (!chck_buffer_read_int(&len, sizeof(len), &stream->in))
          goto err_read;
