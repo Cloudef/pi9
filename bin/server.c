@@ -458,7 +458,6 @@ cb_walk(struct pi9 *pi9, uint16_t tag, uint32_t fid, uint32_t newfid, uint16_t n
       // The name ``..'' (dot-dot) represents the parent directory.
       // Single (dot) is not used in 9p protocol
       if (pi9_string_eq_cstr(&walks[i], "..")) {
-
          struct node *n;
          if (wnode->stat.type == ROOT) {
             // A walk of the name ``..'' in the root directory of a server is equivalent to a walk with no name elements.
