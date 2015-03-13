@@ -475,7 +475,7 @@ cb_walk(struct pi9 *pi9, uint16_t tag, uint32_t fid, uint32_t newfid, uint16_t n
          size_t *c;
          chck_iter_pool_for_each(&wnode->childs, c) {
             struct node *n;
-            if (!(n = get_node(pi9->userdata, *c)) || pi9_string_eq(&walks[i], &n->stat.name))
+            if (!(n = get_node(pi9->userdata, *c)) || !pi9_string_eq(&walks[i], &n->stat.name))
                continue;
 
             qids[*out_nwqid] = &n->stat.qid;
