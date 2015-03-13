@@ -8,7 +8,7 @@
 #include "pi9.h"
 #include "chck/buffer/buffer.h"
 
-#define VERBOSE true
+#define VERBOSE false
 #define MAXWELEM 16
 
 static const uint16_t NOTAG = (uint16_t)~0;
