@@ -8,6 +8,11 @@ static const uint32_t PI9_NOFID = (uint32_t)~0;
 
 struct pi9_stream;
 
+struct pi9_reply {
+   const void *start;
+   uint16_t tag;
+};
+
 struct pi9_qid {
    uint8_t type;
    uint32_t vers;
@@ -31,8 +36,8 @@ struct pi9_stat {
 struct pi9 {
    void *userdata;
    struct pi9_stream *stream;
-
    uint32_t msize;
+   int fd; // current fd
 
    struct pi9_procs {
       bool (*auth)(struct pi9 *pi9, uint16_t tag, uint32_t afid, const struct pi9_string *uname, const struct pi9_string *aname, struct pi9_qid **qid);
@@ -105,11 +110,13 @@ enum pi9_error {
    PI9_ERR_LAST,
 };
 
+void pi9_reply_start(struct pi9_reply *r, uint16_t tag, struct pi9_stream *stream);
+bool pi9_reply_send(struct pi9_reply *r, int fd, struct pi9_stream *stream);
 bool pi9_write_stat(struct pi9_stat *stat, struct pi9_stream *stream);
 void pi9_write_error(uint16_t tag, enum pi9_error error, struct pi9_stream *stream);
 size_t pi9_write(const void *src, size_t size, size_t nmemb, struct pi9_stream *stream);
 void pi9_stat_release(struct pi9_stat *stat);
-bool pi9_process(struct pi9 *pi9, int32_t fd);
+bool pi9_process(struct pi9 *pi9, int fd);
 bool pi9_init(struct pi9 *pi9, uint32_t msize, struct pi9_procs *procs, void *userdata);
 void pi9_release(struct pi9 *pi9);
 

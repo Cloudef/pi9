@@ -9,8 +9,9 @@
 #include <assert.h>
 
 #include "pi9.h"
-#include "chck/pool/pool.h"
-#include "chck/lut/lut.h"
+#include <chck/pool/pool.h>
+#include <chck/lut/lut.h>
+#include <chck/math/math.h>
 
 #define M(m) (m & 3)
 
@@ -38,7 +39,7 @@ struct node {
    bool open;
 
    struct node_procs {
-      bool (*read)(struct pi9 *pi9, struct node *node, uint64_t offset, uint32_t count);
+      bool (*read)(struct pi9 *pi9, struct node *node, uint16_t tag, uint64_t offset, uint32_t count);
       bool (*write)(struct pi9 *pi9, struct node *node, uint64_t offset, uint32_t count, const void *data);
       uint64_t (*size)(struct pi9 *pi9, struct node *node);
    } procs;
@@ -212,53 +213,66 @@ clunk_fid(struct fs *fs, uint32_t fid)
 }
 
 static bool
-cb_read_qtdir(struct pi9 *pi9, struct node *node, uint64_t offset, uint32_t count)
+cb_read_qtdir(struct pi9 *pi9, struct node *node, uint16_t tag, uint64_t offset, uint32_t count)
 {
    (void)offset, (void)count;
+
+   struct pi9_reply reply;
+   pi9_reply_start(&reply, tag, pi9->stream);
 
    // For directories, read returns an integral number of directory entries exactly as in stat (see stat(5)),
    // one for each member of the directory. The read request message must have offset equal to zero or the
    // value of offset in the previous read on the directory, plus the number of bytes returned in the previous read.
    // In other words, seeking other than to the beginning is illegal in a directory (see seek(2)).
 
-   struct pi9_stat stats[2];
-   memcpy(&stats[0], &node->stat, sizeof(struct pi9_stat));
-   memcpy(&stats[1], &node->stat, sizeof(struct pi9_stat));
-   pi9_string_set_cstr_with_length(&stats[0].name, ".", 1, false);
-   pi9_string_set_cstr_with_length(&stats[1].name, "..", 2, false);
+   if (offset == 0) {
+      struct pi9_stat stats[2];
+      memcpy(&stats[0], &node->stat, sizeof(struct pi9_stat));
+      memcpy(&stats[1], &node->stat, sizeof(struct pi9_stat));
+      stats[0].name = (struct pi9_string){ ".", 1, false };
+      stats[1].name = (struct pi9_string){ "..", 2, false };
 
-   for (uint32_t i = 0; i < 2; ++i) {
-      if (!pi9_write_stat(&stats[i], pi9->stream))
-         return false;
+      for (uint32_t i = 0; i < 2; ++i) {
+         if (!pi9_write_stat(&stats[i], pi9->stream))
+            return false;
+      }
+
+      for (size_t i = 0; i < node->childs.items.count; ++i) {
+         size_t *n = chck_iter_pool_get(&node->childs, i);
+         struct node *c = get_node(pi9->userdata, *n);
+         assert(c);
+
+         // update size from callback
+         if (c->procs.size)
+            c->stat.length = c->procs.size(pi9, c);
+
+         if (!pi9_write_stat(&c->stat, pi9->stream))
+            return false;
+      }
    }
 
-   for (size_t i = 0; i < node->childs.items.count; ++i) {
-      size_t *n = chck_iter_pool_get(&node->childs, i);
-      struct node *c = get_node(pi9->userdata, *n);
-      assert(c);
-
-      // update size from callback
-      if (c->procs.size)
-         c->stat.length = c->procs.size(pi9, c);
-
-      if (!pi9_write_stat(&c->stat, pi9->stream))
-         return false;
-   }
-
-   return true;
+   return pi9_reply_send(&reply, pi9->fd, pi9->stream);
 }
 
 static bool
-cb_read_hello(struct pi9 *pi9, struct node *node, uint64_t offset, uint32_t count)
+cb_read_hello(struct pi9 *pi9, struct node *node, uint16_t tag, uint64_t offset, uint32_t count)
 {
    (void)node, (void)offset, (void)count;
+
+   struct pi9_reply reply;
+   pi9_reply_start(&reply, tag, pi9->stream);
 
    // The read request asks for count bytes of data from the file identified by fid,
    // which must be opened for reading, starting offset bytes after the beginning of the file.
    // The bytes are returned with the read reply message.
 
-   // XXX: Just example here, we ignore offset and count
-   return (pi9_write("Hello World!", 1, sizeof("Hello World!"), pi9->stream) == sizeof("Hello World!"));
+   const size_t size = sizeof("Hello World!");
+   offset = chck_minsz(size, offset);
+   count = chck_minsz(size - offset, count);
+   if (!(pi9_write("Hello World!" + offset, 1, count, pi9->stream)) == count)
+      return false;
+
+   return pi9_reply_send(&reply, pi9->fd, pi9->stream);
 }
 
 static bool
@@ -474,7 +488,7 @@ cb_walk(struct pi9 *pi9, uint16_t tag, uint32_t fid, uint32_t newfid, uint16_t n
          size_t *c;
          chck_iter_pool_for_each(&wnode->childs, c) {
             struct node *n;
-            if (!(n = get_node(pi9->userdata, *c)) || !pi9_string_eq(&walks[i], &n->stat.name))
+            if (!(n = get_node(pi9->userdata, *c)) || pi9_string_eq(&walks[i], &n->stat.name))
                continue;
 
             qids[*out_nwqid] = &n->stat.qid;
@@ -624,7 +638,7 @@ cb_read(struct pi9 *pi9, uint16_t tag, uint32_t fid, uint64_t offset, uint32_t c
    if (M(f->omode) != PI9_OREAD)
       goto err_not_allowed;
 
-   if (f->procs.read && !f->procs.read(pi9, f, offset, count))
+   if (f->procs.read && !f->procs.read(pi9, f, tag, offset, count))
       goto err_write;
 
    return true;
@@ -865,7 +879,7 @@ sock_unix(char *address, struct sockaddr_un *sa, socklen_t *salen)
    strncpy(sa->sun_path, address, sizeof(sa->sun_path));
    *salen = SUN_LEN(sa);
 
-   int32_t fd;
+   int fd;
    if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
       return -1;
 
@@ -877,7 +891,7 @@ announce_unix(char *file)
 {
    assert(file);
 
-   int32_t fd;
+   int fd;
    socklen_t salen;
    struct sockaddr_un sa;
    if ((fd = sock_unix(file, &sa, &salen)) < 0)
@@ -941,14 +955,13 @@ main(int argc, char *argv[])
 
    int32_t clients = 0;
    while (running) {
-      int32_t ret;
-      if ((ret = poll(fds, 1 + clients, 500)) <= 0)
+      if (poll(fds, 1 + clients, 500) <= 0)
          continue;
 
       for (int32_t i = 0; i < 1 + clients; ++i) {
          if (fds[i].revents & POLLIN) {
             if (i == 0) {
-               int32_t fd;
+               int fd;
                if ((fd = accept(fds[i].fd, NULL, NULL)) >= 0) {
                   if (clients > 0) {
                      fprintf(stderr, "Rejected client\n");

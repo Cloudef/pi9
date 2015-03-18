@@ -6,7 +6,7 @@
 #include <inttypes.h>
 
 #include "pi9.h"
-#include "chck/buffer/buffer.h"
+#include <chck/buffer/buffer.h>
 
 #define VERBOSE false
 #define MAXWELEM 16
@@ -519,19 +519,7 @@ op_Tread(struct pi9 *pi9, uint16_t tag, struct pi9_stream *stream)
    fprintf(stderr, "Tread %u %u %"PRIu64" %u\n", tag, fid, offset, count);
 #endif
 
-   chck_buffer_seek(&stream->out, HDRSZ + sizeof(uint32_t), SEEK_SET);
-   void *start = stream->out.curpos;
-
    if (pi9->procs.read && !pi9->procs.read(pi9, tag, fid, offset, count))
-      return false;
-
-   const uint32_t sbufsz = (offset != 0 ? 0 : (stream->out.curpos - start));
-   const uint32_t size = HDRSZ + sizeof(sbufsz) + sbufsz;
-   chck_buffer_seek(&stream->out, 0, SEEK_SET);
-   if (!chck_buffer_write_int(&size, sizeof(size), &stream->out) ||
-       !chck_buffer_write_int((uint8_t[]){Rread}, sizeof(uint8_t), &stream->out) ||
-       !chck_buffer_write_int(&tag, sizeof(tag), &stream->out) ||
-       !chck_buffer_write_int(&sbufsz, sizeof(sbufsz), &stream->out))
       goto err_write;
 
    return true;
@@ -743,7 +731,7 @@ err_unknown_op:
 }
 
 static bool
-read_msg(struct pi9 *pi9, int32_t fd, struct pi9_stream *stream)
+read_msg(struct pi9 *pi9, int fd, struct pi9_stream *stream)
 {
    assert(pi9 && fd >= 0);
 
@@ -779,14 +767,46 @@ read_msg(struct pi9 *pi9, int32_t fd, struct pi9_stream *stream)
 }
 
 static inline bool
-write_msg(int32_t fd, struct pi9_stream *stream)
+write_msg(int fd, struct pi9_stream *stream)
 {
    assert(fd >= 0 && stream->out.buffer);
+
+   if ((size_t)(stream->out.curpos - stream->out.buffer) < sizeof(uint32_t))
+      return true;
+
    const uint32_t size = *(uint32_t*)stream->out.buffer;
 #if VERBOSE
    fprintf(stderr, "Write message of size: %u\n", size);
 #endif
    return write(fd, stream->out.buffer, size) == size;
+}
+
+void
+pi9_reply_start(struct pi9_reply *reply, uint16_t tag, struct pi9_stream *stream)
+{
+   assert(reply && stream);
+   memset(reply, 0, sizeof(struct pi9_reply));
+
+   chck_buffer_seek(&stream->out, HDRSZ + sizeof(uint32_t), SEEK_SET);
+   reply->start = stream->out.curpos;
+   reply->tag = tag;
+}
+
+bool
+pi9_reply_send(struct pi9_reply *reply, int fd, struct pi9_stream *stream)
+{
+   assert(reply && stream);
+
+   const uint32_t sbufsz = (stream->out.curpos - reply->start);
+   const uint32_t size = HDRSZ + sizeof(sbufsz) + sbufsz;
+   chck_buffer_seek(&stream->out, 0, SEEK_SET);
+   if (!chck_buffer_write_int(&size, sizeof(size), &stream->out) ||
+       !chck_buffer_write_int((uint8_t[]){Rread}, sizeof(uint8_t), &stream->out) ||
+       !chck_buffer_write_int(&reply->tag, sizeof(reply->tag), &stream->out) ||
+       !chck_buffer_write_int(&sbufsz, sizeof(sbufsz), &stream->out))
+      return false;
+
+   return (stream->in.buffer == stream->in.curpos ? write_msg(fd, stream) : true);
 }
 
 bool
@@ -831,12 +851,10 @@ pi9_stat_release(struct pi9_stat *stat)
 }
 
 bool
-pi9_process(struct pi9 *pi9, int32_t fd)
+pi9_process(struct pi9 *pi9, int fd)
 {
    assert(pi9 && fd >= 0 && pi9->stream);
-
-   chck_buffer_seek(&pi9->stream->in, 0, SEEK_SET);
-   chck_buffer_seek(&pi9->stream->out, 0, SEEK_SET);
+   pi9->fd = fd;
 
    bool ret = true;
    if (!read_msg(pi9, fd, pi9->stream)) {
@@ -851,6 +869,9 @@ pi9_process(struct pi9 *pi9, int32_t fd)
       ret = false;
    }
 
+   chck_buffer_seek(&pi9->stream->in, 0, SEEK_SET);
+   chck_buffer_seek(&pi9->stream->out, 0, SEEK_SET);
+   pi9->fd = -1;
    return ret;
 }
 
@@ -874,6 +895,7 @@ pi9_init(struct pi9 *pi9, uint32_t msize, struct pi9_procs *procs, void *userdat
    memcpy(&pi9->procs, procs, sizeof(struct pi9_procs));
    pi9->msize = (msize > 0 ? msize : 8192);
    pi9->userdata = userdata;
+   pi9->fd = -1;
 
    if (!(pi9->stream = calloc(1, sizeof(struct pi9_stream))))
       goto fail;
