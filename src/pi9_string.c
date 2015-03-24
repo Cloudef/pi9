@@ -3,13 +3,15 @@
 #include <stddef.h>
 #include <stdarg.h>
 #include <assert.h>
+#include <chck/overflow/overflow.h>
 
 #include "pi9_string.h"
 
 static inline char*
 ccopy(const char *str, size_t len)
 {
-   char *cpy = calloc(1, len + 1);
+   assert(str);
+   char *cpy = chck_calloc_add_of(len, 1);
    return (cpy ? memcpy(cpy, str, len) : NULL);
 }
 
@@ -56,7 +58,7 @@ pi9_string_set_varg(struct pi9_string *string, const char *fmt, va_list args)
 
    char *str = NULL;
    const size_t len = vsnprintf(NULL, 0, fmt, args);
-   if (len > 0 && !(str = malloc(len + 1)))
+   if (len > 0 && !(str = chck_malloc_add_of(len, 1)))
       return false;
 
    vsnprintf(str, len + 1, fmt, cpy);

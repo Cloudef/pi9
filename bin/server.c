@@ -106,7 +106,7 @@ unlink_childs(struct fs *fs, struct node *parent)
    chck_iter_pool_for_each(&parent->childs, c)
       unlink_nodes(parent, get_node(fs, *c));
 
-   chck_iter_pool_release(&parent->childs);
+   chck_iter_pool_flush(&parent->childs);
 }
 
 static bool
