@@ -110,6 +110,7 @@ static const struct {
 static inline bool
 write_qid(struct pi9_qid *qid, struct pi9_stream *stream)
 {
+   assert(qid && stream);
    return (chck_buffer_write_int(&qid->type, sizeof(qid->type), &stream->out) &&
            chck_buffer_write_int(&qid->vers, sizeof(qid->vers), &stream->out) &&
            chck_buffer_write_int(&qid->path, sizeof(qid->path), &stream->out));
@@ -118,6 +119,7 @@ write_qid(struct pi9_qid *qid, struct pi9_stream *stream)
 static inline bool
 read_qid(struct pi9_qid *qid, struct pi9_stream *stream)
 {
+   assert(qid && stream);
    return (chck_buffer_read_int(&qid->type, sizeof(qid->type), &stream->in) &&
            chck_buffer_read_int(&qid->vers, sizeof(qid->vers), &stream->in) &&
            chck_buffer_read_int(&qid->path, sizeof(qid->path), &stream->in));
@@ -126,6 +128,8 @@ read_qid(struct pi9_qid *qid, struct pi9_stream *stream)
 static inline bool
 read_stat(struct pi9_stat *stat, struct pi9_stream *stream)
 {
+   assert(stat && stream);
+
    uint16_t size;
    if (!chck_buffer_read_int(&size, sizeof(size), &stream->in) ||
        !chck_buffer_read_int(&stat->type, sizeof(stat->type), &stream->in) ||
@@ -248,7 +252,7 @@ op_Tauth(struct pi9 *pi9, uint16_t tag, struct pi9_stream *stream)
    if (!chck_buffer_write_int(&size, sizeof(size), &stream->out) ||
        !chck_buffer_write_int((uint8_t[]){Rauth}, sizeof(uint8_t), &stream->out) ||
        !chck_buffer_write_int(&tag, sizeof(tag), &stream->out) ||
-       !write_qid(qid, stream))
+       (qid && !write_qid(qid, stream)))
       goto err_write;
 
    return true;

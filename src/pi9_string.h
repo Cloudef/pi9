@@ -11,6 +11,8 @@ struct pi9_string {
    bool is_heap;
 };
 
+#define PSTRE(x) (x ? x : "")
+
 static inline bool
 pi9_cstr_is_empty(const char *data)
 {
@@ -21,14 +23,14 @@ static inline bool
 pi9_cstr_ends_with(const char *a, const char *b)
 {
    const size_t lena = (a ? strlen(a) : 0), lenb = (b ? strlen(b) : 0);
-   return (lena >= lenb && !memcmp(a + lena - lenb, b, lenb));
+   return (lena >= lenb && !memcmp(a + lena - lenb, PSTRE(b), lenb));
 }
 
 static inline bool
 pi9_cstr_starts_with(const char *a, const char *b)
 {
    const size_t lena = (a ? strlen(a) : 0), lenb = (b ? strlen(b) : 0);
-   return (lena >= lenb && !memcmp(a, b, lenb));
+   return (lena >= lenb && !memcmp(PSTRE(a), PSTRE(b), lenb));
 }
 
 static inline bool
@@ -53,40 +55,42 @@ static inline bool
 pi9_string_ends_with_cstr(const struct pi9_string *a, const char *cstr)
 {
    const size_t len = (cstr ? strlen(cstr) : 0);
-   return (a->size >= len && !memcmp(a->data + a->size - len, cstr, len));
+   return (a->size >= len && !memcmp(a->data + a->size - len, PSTRE(cstr), len));
 }
 
 static inline bool
 pi9_string_starts_with_cstr(const struct pi9_string *a, const char *cstr)
 {
    const size_t len = (cstr ? strlen(cstr) : 0);
-   return (a->size >= len && !memcmp(a->data, cstr, len));
+   return (a->size >= len && !memcmp(a->data, PSTRE(cstr), len));
 }
 
 static inline bool
 pi9_string_ends_with(const struct pi9_string *a, const struct pi9_string *b)
 {
-   return (a->size >= b->size && !memcmp(a->data + a->size - b->size, b->data, b->size));
+   return (a->size >= b->size && !memcmp(a->data + a->size - b->size, PSTRE(b->data), b->size));
 }
 
 static inline bool
 pi9_string_starts_with(const struct pi9_string *a, const struct pi9_string *b)
 {
-   return (a->size >= b->size && !memcmp(a->data, b->data, b->size));
+   return (a->size >= b->size && !memcmp(PSTRE(a->data), PSTRE(b->data), b->size));
 }
 
 static inline bool
 pi9_string_eq(const struct pi9_string *a, const struct pi9_string *b)
 {
-   return (a->data == b->data) || (a->size == b->size && !memcmp(a->data, b->data, a->size));
+   return (a->data == b->data) || (a->size == b->size && !memcmp(PSTRE(a->data), PSTRE(b->data), a->size));
 }
 
 static inline bool
 pi9_string_eq_cstr(const struct pi9_string *a, const char *cstr)
 {
    const size_t len = (cstr ? strlen(cstr) : 0);
-   return (len == a->size) && (cstr == a->data || !memcmp(a->data, cstr, a->size));
+   return (len == a->size) && (cstr == a->data || !memcmp(PSTRE(a->data), PSTRE(cstr), a->size));
 }
+
+#undef PSTRE
 
 void pi9_string_release(struct pi9_string *string);
 bool pi9_string_set_cstr(struct pi9_string *string, const char *data, bool is_heap);
