@@ -885,9 +885,12 @@ pi9_release(struct pi9 *pi9)
    if (!pi9)
       return;
 
-   chck_buffer_release(&pi9->stream->out);
-   chck_buffer_release(&pi9->stream->in);
-   free(pi9->stream);
+   if (pi9->stream) {
+      chck_buffer_release(&pi9->stream->out);
+      chck_buffer_release(&pi9->stream->in);
+      free(pi9->stream);
+   }
+
    memset(pi9, 0, sizeof(struct pi9));
 }
 
