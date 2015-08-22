@@ -147,7 +147,7 @@ read_stat(struct pi9_stat *stat, struct pi9_stream *stream)
       if (!chck_buffer_read_int(&len, sizeof(len), &stream->in))
          return false;
 
-      pi9_string_set_cstr_with_length(fields[i], stream->in.curpos, len, false);
+      pi9_string_set_cstr_with_length(fields[i], (char*)stream->in.curpos, len, false);
    }
 
    return true;
@@ -171,7 +171,7 @@ op_Tversion(struct pi9 *pi9, uint16_t tag, struct pi9_stream *stream)
 #endif
 
    struct pi9_string version = {0};
-   pi9_string_set_cstr_with_length(&version, stream->in.curpos, vsize, false);
+   pi9_string_set_cstr_with_length(&version, (char*)stream->in.curpos, vsize, false);
 
    // A successful version request initializes the connection.
    // All outstanding I/O on the connection is aborted; all active fids are freed (`clunked') automatically.
@@ -231,7 +231,7 @@ op_Tauth(struct pi9 *pi9, uint16_t tag, struct pi9_stream *stream)
       goto err_read;
 
    struct pi9_string uname = {0};
-   pi9_string_set_cstr_with_length(&uname, stream->in.curpos, usize, false);
+   pi9_string_set_cstr_with_length(&uname, (char*)stream->in.curpos, usize, false);
    chck_buffer_seek(&stream->in, usize, SEEK_CUR);
 
    uint16_t asize;
@@ -239,7 +239,7 @@ op_Tauth(struct pi9 *pi9, uint16_t tag, struct pi9_stream *stream)
       goto err_read;
 
    struct pi9_string aname = {0};
-   pi9_string_set_cstr_with_length(&aname, stream->in.curpos, asize, false);
+   pi9_string_set_cstr_with_length(&aname, (char*)stream->in.curpos, asize, false);
 
    struct pi9_qid *qid = NULL;
    if (pi9->procs.auth && !pi9->procs.auth(pi9, tag, afid, &uname, &aname, &qid))
@@ -285,7 +285,7 @@ op_Tattach(struct pi9 *pi9, uint16_t tag, struct pi9_stream *stream)
       goto err_read;
 
    struct pi9_string uname = {0};
-   pi9_string_set_cstr_with_length(&uname, stream->in.curpos, usize, false);
+   pi9_string_set_cstr_with_length(&uname, (char*)stream->in.curpos, usize, false);
    chck_buffer_seek(&stream->in, usize, SEEK_CUR);
 
    uint16_t asize;
@@ -293,7 +293,7 @@ op_Tattach(struct pi9 *pi9, uint16_t tag, struct pi9_stream *stream)
       goto err_read;
 
    struct pi9_string aname = {0};
-   pi9_string_set_cstr_with_length(&aname, stream->in.curpos, asize, false);
+   pi9_string_set_cstr_with_length(&aname, (char*)stream->in.curpos, asize, false);
 
    struct pi9_qid *qid = NULL;
    if (pi9->procs.attach && !pi9->procs.attach(pi9, tag, fid, afid, &uname, &aname, &qid))
@@ -373,7 +373,7 @@ op_Twalk(struct pi9 *pi9, uint16_t tag, struct pi9_stream *stream)
       if (!chck_buffer_read_int(&len, sizeof(len), &stream->in))
          goto err_read;
 
-      pi9_string_set_cstr_with_length(&walks[i], stream->in.curpos, len, false);
+      pi9_string_set_cstr_with_length(&walks[i], (char*)stream->in.curpos, len, false);
    }
 
    uint16_t nwqid = 0;
@@ -464,7 +464,7 @@ op_Tcreate(struct pi9 *pi9, uint16_t tag, struct pi9_stream *stream)
       goto err_read;
 
    struct pi9_string name = {0};
-   pi9_string_set_cstr_with_length(&name, stream->in.curpos, nsize, false);
+   pi9_string_set_cstr_with_length(&name, (char*)stream->in.curpos, nsize, false);
 
    uint8_t mode;
    uint32_t perm;
@@ -640,7 +640,7 @@ op_Tstat(struct pi9 *pi9, uint16_t tag, struct pi9_stream *stream)
 #endif
 
    chck_buffer_seek(&stream->out, HDRSZ + sizeof(uint16_t), SEEK_SET);
-   void *start = stream->out.curpos;
+   uint8_t *start = stream->out.curpos;
 
    struct pi9_stat *stat = NULL;
    if (pi9->procs.stat && !pi9->procs.stat(pi9, tag, fid, &stat))

@@ -9,7 +9,7 @@ static const uint32_t PI9_NOFID = (uint32_t)~0;
 struct pi9_stream;
 
 struct pi9_reply {
-   const void *start;
+   const uint8_t *start;
    uint16_t tag;
 };
 

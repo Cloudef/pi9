@@ -269,7 +269,7 @@ cb_read_hello(struct pi9 *pi9, struct node *node, uint16_t tag, uint64_t offset,
    const size_t size = sizeof("Hello World!");
    offset = chck_minsz(size, offset);
    count = chck_minsz(size - offset, count);
-   if (!(pi9_write("Hello World!" + offset, 1, count, pi9->stream)) == count)
+   if (pi9_write("Hello World!" + offset, 1, count, pi9->stream) != count)
       return false;
 
    return pi9_reply_send(&reply, pi9->fd, pi9->stream);
@@ -282,7 +282,7 @@ cb_write_hello(struct pi9 *pi9, struct node *node, uint64_t offset, uint32_t cou
 
    fprintf(stderr, "\n--- wrote to %s\n", node->stat.name.data);
    fprintf(stderr, "(%u) ", count);
-   for (size_t i = 0; i < count; ++i) putc(*(char*)(data + i), stderr);
+   for (size_t i = 0; i < count; ++i) putc(*((char*)data + i), stderr);
    fprintf(stderr, "---\n\n");
    return true;
 }
