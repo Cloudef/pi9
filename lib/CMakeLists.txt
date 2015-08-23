@@ -1,2 +1,3 @@
-add_library(chck_pi9_lib STATIC chck/chck/buffer/buffer.c)
-add_library(chck_pi9_server STATIC chck/chck/pool/pool.c chck/chck/lut/lut.c)
+set(CHCK_BUILD_STATIC ON CACHE STRING "Build chck statically if not found systemwide" FORCE)
+set(CHCK_BUILD_TESTS OFF CACHE STRING "Do not build chck tests" FORCE)
+add_subproject(chck)

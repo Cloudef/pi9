@@ -1,40 +1,62 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-PROJECT(pi9)
-set(PI9_NAME "pi9")
-set(PI9_DESCRIPTION "9p server abstraction library")
+CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
+PROJECT(pi9 VERSION 0.0.1 LANGUAGES C)
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/CMake")
 
+# Subprojects
+include(subproject)
+add_subdirectory(lib)
+
+# CPack
+set(CPACK_SYSTEM_NAME "${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}")
+set(CPACK_GENERATOR "7Z")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/pkg")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "9p server abstraction library")
+set(CPACK_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION ON)
+
+# Includes
+include(GNUInstallDirs)
+include(FeatureSummary)
+include(CPack)
+
+OPTION(PI9_BUILD_STATIC "Build pi9 as static library" OFF)
 OPTION(PI9_BUILD_BINARIES "Build binaries" ON)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${pi9_SOURCE_DIR}/CMake)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
+add_feature_info(Static PI9_BUILD_STATIC "Compile as static library")
+add_feature_info(Tests PI9_BUILD_TESTS "Compile tests")
+
+if (NOT PI9_BUILD_STATIC)
+   set(BUILD_SHARED_LIBS ON)
+endif ()
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/lib")
 
 if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-   set(ldflags -Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now)
+   set(ldflags -Wl,-O1,--no-undefined,--sort-common,--as-needed,-z,relro,-z,now)
    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ldflags}")
    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} ${ldflags}")
    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${ldflags}")
+
+   if ("${CMAKE_C_FLAGS}" STREQUAL "")
+      add_definitions(-O2)
+      add_definitions(-fstack-protector-strong -fstack-check -flto)
+   endif ()
+
    add_definitions(
       -Wall -Wextra -Wno-variadic-macros -Wno-long-long -Wformat=2 -Winit-self -Wfloat-equal
       -Wcast-align -Wpointer-arith -Wmissing-prototypes -Wsuggest-attribute=pure -Wsuggest-attribute=const)
-   add_definitions(-fstack-protector-strong -fstack-check -pie -flto)
 endif ()
 
-if (UNIX AND CMAKE_COMPILER_IS_GNUCC)
-   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-   if (${CMAKE_VERSION} VERSION_LESS 2.8.9)
-      add_definitions(-fPIC)
-   endif ()
-endif ()
+# -std=c99 -fpic -fpie -D_DEFAULT_SOURCE
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
+set(CMAKE_POSITION_INDEPENDENT_CODE OFF)
+add_definitions(-D_DEFAULT_SOURCE)
 
-add_definitions(-std=c99 -D_DEFAULT_SOURCE)
-
-include_directories(
-   ${CMAKE_CURRENT_SOURCE_DIR}/src
-   ${CMAKE_CURRENT_SOURCE_DIR}/lib/chck)
-
-add_subdirectory(lib)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src ${CHCK_INCLUDE_DIRS})
 add_subdirectory(src)
 
 if (PI9_BUILD_BINARIES)
@@ -42,3 +64,7 @@ if (PI9_BUILD_BINARIES)
 endif ()
 
 file(COPY src/pi9.h src/pi9_string.h DESTINATION include/pi9)
+
+if ("${CMAKE_PROJECT_NAME}" STREQUAL "${PROJECT_NAME}")
+   feature_summary(WHAT ALL)
+endif ()
