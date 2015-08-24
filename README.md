@@ -5,7 +5,7 @@
 ## Building
 
     mkdir target && cd target                # - create build target directory
-    cmake -DCMAKE_INSTALL_PREFIX=build ..    # - run CMake, set install directory
+    cmake -DCMAKE_BUILD_TYPE=Upstream ..     # - run CMake
     make                                     # - compile
 
 ## License
