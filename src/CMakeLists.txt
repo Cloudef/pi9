@@ -10,5 +10,9 @@ set(PI9_LIBRARIES pi9 CACHE STRING "Libraries of pi9" FORCE)
 set(PI9_INCLUDE_DIRS "${PROJECT_BINARY_DIR}/include" CACHE STRING "Include directories of pi9" FORCE)
 mark_as_advanced(PI9_LIBRARIES PI9_INCLUDE_DIRS)
 
+# Add pkgconfig
+configure_file(pi9.pc.in pi9.pc @ONLY)
+
 install(TARGETS pi9 DESTINATION "${CMAKE_INSTALL_LIBDIR}")
 install(DIRECTORY "${PROJECT_BINARY_DIR}/include/pi9" DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/pi9.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")

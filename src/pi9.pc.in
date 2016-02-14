@@ -1,0 +1,11 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=${exec_prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+
+Name: @PROJECT_NAME@
+Description: 9p server abstraction library
+Version: @PROJECT_VERSION@
+Requires.private: chck
+Libs: -L${libdir} -lpi9
+Cflags: -I${includedir}
